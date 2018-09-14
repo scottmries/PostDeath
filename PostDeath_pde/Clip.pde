@@ -1,11 +1,11 @@
-class Fadeable {
+class Clip{
   Boolean fadingIn = false;
   Boolean fadingOut = false;
   Boolean playing = false;
   Boolean notYetStarted = true;
   Boolean finished = false;
   Boolean betweenFades = false;
-  int opacity = 0;
+  float opacity = 0;
   float fadeSeconds = 1;
   
   void show() {
@@ -58,6 +58,16 @@ class Fadeable {
     tint(255, this.opacity);
     this.showBetweenFades();
     tint(255, 255);
+  }
+  
+  void cutIn() {
+    this.playing = true;
+    this.opacity = 255;
+  }
+  
+  void cutOut() {
+    this.playing = false;
+    this.opacity = 0;
   }
   
 }

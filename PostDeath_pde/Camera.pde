@@ -1,5 +1,6 @@
-class CameraController extends Fadeable{
+class CameraController extends Clip{
   Capture cam;
+  Boolean invert = false;
   
   CameraController(Capture tempC) {
     super();
@@ -18,7 +19,11 @@ class CameraController extends Fadeable{
     } else {
       this.start();
       //this.cam.read();
-      image(this.cam, 0, 0, width, height);
+      
+      image(this.cam, 0, 0, 1280, 960);
+      if(this.invert && frameCount % 2 == 0) {
+        filter(INVERT);
+      }
     }
   }
   
