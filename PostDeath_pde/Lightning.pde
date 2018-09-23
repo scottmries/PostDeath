@@ -1,34 +1,66 @@
 class Lightning extends Clip {
-  int r = 255;
-  int g = 0;
-  int b = 255;
   color backgroundColor;
   color foregroundColor;
-  LineNode baseLineNode;
+  color sourceColor = color(255, 0 , 255);
+  color destinationColor = color(255, 0, 255);;
+  float transitionSeconds = 0.5;
+  int colorTransitionElapsedFrames = 0;
+  int points = 50;
+  LightningPoint[] lightningPoints = new LightningPoint[points];
   
   Lightning() {
     this.setColors();
-    this.baseLineNode = new LineNode();
+    for(int i = 0; i < points; i++) {
+      lightningPoints[i] = new LightningPoint(random(2 * width) - width / 2, random(2 * height) - height / 2);
+    }
+    for(int i = 0; i < points; i++) {
+      int numberToConnect = 1 + floor(random(20));
+      for(int j = 0; j <= numberToConnect; j++) {
+        lightningPoints[i].connect(lightningPoints[floor(random(points))]);
+      }
+    }
   }
   
   void showBetweenFades() {
-    this.setColors();
-    background(backgroundColor);
-    stroke(foregroundColor);
-    strokeWeight(3);
-    this.baseLineNode.draw();
+    if(this.playing){
+      this.setColors();
+      background(backgroundColor);
+      stroke(foregroundColor);
+      strokeWeight(3);
+      for(int i = 0; i < points; i++) {
+        lightningPoints[i].draw();
+        lightningPoints[i].move();
+      }
+    }
   }
   
   void setColors() {
-    r = this.setColorValue(r);
-    g = this.setColorValue(g);
-    b = this.setColorValue(b);
+    if(this.colorTransitionElapsedFrames / frameRate > this.transitionSeconds) {
+      this.colorTransitionElapsedFrames = 0;
+      this.sourceColor = this.destinationColor;
+      this.destinationColor = color(
+        this.setColorValue(red(this.sourceColor)), 
+        this.setColorValue(green(this.sourceColor)),
+        this.setColorValue(blue(this.sourceColor))
+      );
+    }
+    float factor = (this.colorTransitionElapsedFrames / frameRate) / this.transitionSeconds;
+    float r = lerp(this.sourceColor >> 16 & 0xFF, this.destinationColor >> 16 & 0xFF, factor);
+    float g = lerp(this.sourceColor >> 8 & 0xFF, this.destinationColor >> 8 & 0xFF, factor);
+    float b = lerp(this.sourceColor >> 0 & 0xFF, this.destinationColor >> 0 & 0xFF, factor);
     backgroundColor = color(r, g, b);
-    foregroundColor = color(255 - r, 255 - g, 255 - b);
+    foregroundColor = color(255 -r, 255 - g, 255 - b);
+    this.colorTransitionElapsedFrames++;
   }
   
-  int setColorValue(int value){
-    value = value + int(random(9)) - 4;
+  float setColorValue(float value){
+    int direction = 0;
+    if(random(1) > 0.5) {
+      direction = 1;
+    } else {
+      direction = -1;
+    }
+    value = value + (12 + random(25)) * direction;
     if (value < 0) {
       value = abs(value);
     }
@@ -39,133 +71,50 @@ class Lightning extends Clip {
   }
 }
 
-class LineNode {
-  int x1, y1, x2, y2;
-  LightningPoint point;
-  ArrayList<LineNode> connectedPoints = new ArrayList<LineNode>();
-  Boolean alreadyMoved = false;
-  Boolean alreadyDrawnConnectedPoints = false;
-  int previousRecursions;
-  int density = 7;
-  float chanceToConnect = 0.5;
-  
-  LineNode(int tx1, int ty1, int tRecursions) {
-    this.point = new LightningPoint(tx1, ty1);
-    this.previousRecursions = tRecursions + 1;
-    this.setConnectedPoints();
-  }
-  
-  LineNode() {
-    this.point = new LightningPoint(width / 2, height / 2);
-    this.previousRecursions = 0;
-    this.setConnectedPoints();
-    this.connectUnrelatedNodes();
-  }
-  
-  ArrayList<LineNode> getSubsetOfAllConnectedNodes() {
-    // this would work better iteratively
-    // whenever a new point is generated, add it to an ArrayList of all connected points,
-    // then just iterate over it
-    ArrayList<LineNode> nodes = new ArrayList<LineNode>();
-    for(LineNode point : this.connectedPoints) {
-      if(random(1) < this.chanceToConnect) {
-        nodes.add(point);
-        nodes.addAll(point.getSubsetOfAllConnectedNodes());
-      }
-    }
-    return nodes;
-  }
-  
-  void connectUnrelatedNodes() {
-    ArrayList<LineNode> pointsToConnect = this.getSubsetOfAllConnectedNodes();
-    ArrayList<LineNode> pointsToConnectTo = this.getSubsetOfAllConnectedNodes();
-    int leastNodes = min(pointsToConnect.size(), pointsToConnectTo.size());
-    for(int i = 0; i < leastNodes; i++) {
-      pointsToConnect.get(i).connect(pointsToConnectTo.get(i));
-    }
-  }
-  
-  void connect(LineNode point) {
-    this.connectedPoints.add(point);
-  }
-  
-  void setConnectedPoints() {
-    // if this point is onscreen
-    if(this.point.x >= 0 && this.point.x < width && this.point.y >= 0 && this.point.y < height && this.previousRecursions < this.density) {
-      int pointsToSet = 2 + int(random(2));
-      // pass a subset of the connectedPoints down
-      for(int i = 0; i < pointsToSet; i++) {
-        LineNode point =  new LineNode(
-          this.point.x + int(random(1000)) - 500,
-          this.point.y + int(random(1000)) - 500,
-          this.previousRecursions
-        );
-        this.connect(point);
-      }
-    } 
-  }
-  
-  void moveConnectedPoints() {
-    this.point.move();
-    for(LineNode point : this.connectedPoints) {
-      if(!point.alreadyMoved){
-        point.moveConnectedPoints();  
-      }
-    }
-  }
-  
-  void drawConnectedPoints() {
-    this.alreadyDrawnConnectedPoints = true;
-    for(LineNode point : this.connectedPoints) {
-      line(this.point.x, this.point.y, point.point.x, point.point.y);
-      if(!point.alreadyDrawnConnectedPoints) {
-        point.drawConnectedPoints();
-      }
-    }
-  }
-  
-  void resetConnectedPoints() {
-    this.resetDraws();
-    this.resetMoves();
-  }
-  
-  void resetDraws() {
-    this.alreadyDrawnConnectedPoints = false;
-    for(LineNode point : this.connectedPoints) {
-      if(point.alreadyDrawnConnectedPoints) {
-        point.alreadyDrawnConnectedPoints = false;
-        point.resetDraws();
-      }
-    }
-  }
-  
-  void resetMoves() {
-    this.alreadyMoved = false;
-    for(LineNode point : this.connectedPoints) {
-      if(point.alreadyMoved) {
-        point.alreadyMoved = false;
-        point.resetMoves();
-      }
-    }
-  }
-  
-  void draw() {
-    this.drawConnectedPoints();
-    this.moveConnectedPoints();
-    this.resetConnectedPoints();
-  }
-}
-
 class LightningPoint {
-  int x, y;
+  float x, y, sourceX, sourceY, destinationX, destinationY;
+  float moveTransitionSeconds = 2;
+  float elapsedTransitionFrames = 0;
+  ArrayList<LightningPoint> connectedPoints = new ArrayList<LightningPoint>();
   
-  LightningPoint(int tx, int ty) {
+  LightningPoint(float tx, float ty) {
     x = tx;
     y = ty;
+    this.sourceX = tx;
+    this.sourceY = ty;
+    this.setDestinationCoordinates();
   }
   
   void move() {
-    this.x += random(3) - 1;
-    this.y += random(3) - 1;
+    if (this.elapsedTransitionFrames / frameRate > this.moveTransitionSeconds) {
+      this.elapsedTransitionFrames = 0;
+      this.sourceX = this.destinationX;
+      this.sourceY = this.destinationY;
+      this.setDestinationCoordinates();
+    }
+    float factor = (this.elapsedTransitionFrames / frameRate) / this.moveTransitionSeconds;
+    this.x = lerp(this.sourceX, this.destinationX, factor);
+    this.y = lerp(this.sourceY, this.destinationY, factor);
+    this.elapsedTransitionFrames++;
+  }
+  
+  void setDestinationCoordinates() {
+    this.destinationX = this.getDestinationCoordinate(this.x);
+    this.destinationY = this.getDestinationCoordinate(this.y);
+  }
+  
+  float getDestinationCoordinate(float source) {
+    return source + random(41) - 20;
+  }
+  
+  void connect(LightningPoint p){
+    connectedPoints.add(p);
+  }
+  
+  void draw(){
+    for(int i = 0; i < connectedPoints.size(); i++) {
+      LightningPoint p = connectedPoints.get(i);
+      line(this.x, this.y, p.x, p.y);
+    }
   }
 }

@@ -11,7 +11,7 @@ class TextController{
   TextController(String[] tTexts, int tx, int ty, int tSize) {
     this.texts = new Text[tTexts.length];
     for(int i = 0; i < this.texts.length; i++) {
-      this.texts[i] = new Text(tTexts[i], tx, ty, tSize);
+      //this.texts[i] = new Text(tTexts[i], tx, ty, tSize);
     }
     this.setCurrentText();
   }

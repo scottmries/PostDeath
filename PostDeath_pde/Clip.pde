@@ -33,7 +33,7 @@ class Clip{
   }
   
   
-  void fadeOut() {
+  public void fadeOut() {
     println("fading out");
     this.fadingIn = false;
     this.fadingOut = true;
@@ -68,6 +68,22 @@ class Clip{
   void cutOut() {
     this.playing = false;
     this.opacity = 0;
+  }
+  
+  void toggleCut() {
+    if (this.playing) {
+      this.cutOut();
+    } else {
+      this.cutIn();
+    }
+  }
+  
+  void toggleFade() {
+    if (this.playing) {
+      this.fadeOut();
+    } else {
+      this.fadeIn();
+    }
   }
   
 }
