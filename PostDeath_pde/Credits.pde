@@ -41,12 +41,11 @@ class Credits extends Clip {
       img = images[index];
       s = createShape();
       if(framesInCycle > 90) {
-        if(index < images.length){
+        if(index < images.length - 1){
           index++;
         } else {
           this.cutOut();
         }
-        //index = (index + 1) % images.length;
         moving = !moving;
         framesInCycle = 0;
         colorIndex = (colorIndex + 1) % bgColors.length;

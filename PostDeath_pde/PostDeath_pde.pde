@@ -41,8 +41,8 @@ void setup() {
 
     // The camera can be initialized directly using an 
     // element from the array returned by list():
-    //cam = new Capture(this, 640, 480, "Logitech HD Webcam C310", 30);
-    cam = new Capture(this, 640, 480, cameras[0], 30);
+    cam = new Capture(this, 640, 480, "Logitech HD Webcam C310", 30);
+    //cam = new Capture(this, 640, 480, cameras[0], 30);
     cam.start(); 
 
     camController = new CameraController(cam);
@@ -51,7 +51,7 @@ void setup() {
   // clips
   lightning = new Lightning();
   stripes = new Stripes();
-  trains = new VideoClip(this, "Virginia.mp4", 0, 0);
+  trains = new VideoClip(this, "Virginia.mp4", 300, 0);
   triangles = new Triangles();
   vj = new VJ(this, cam);
   curtains = new Curtains();
@@ -70,7 +70,7 @@ void setup() {
   for (int i = 0; i < songLyricImagePaths.length; i++) {
     songLyricImagePaths[i] = "song/Post_Death-" + nf(i + 1, 2) + ".png";
   }
-  songLyricsController = new SongLyricsController(songLyricImagePaths, xMargin, yMargin);
+  songLyricsController = new SongLyricsController(songLyricImagePaths, 300, 0);
 }
 
 void draw() {

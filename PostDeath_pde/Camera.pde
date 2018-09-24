@@ -19,8 +19,9 @@ class CameraController extends Clip{
     } else {
       this.start();
       //this.cam.read();
-      
-      image(this.cam, 0, 0, 1280, 960);
+      //image(this.cam, width / 2 - this.cam.width / 2, 0, width - (width / 2 - this.cam.width / 2), 960);
+      image(this.cam, 0, 0, 2560, 1920);
+      //image(this.cam, 0, 0, 1280, 960);
       if(this.invert && frameCount % 2 == 0) {
         filter(INVERT);
       }

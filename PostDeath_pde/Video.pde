@@ -26,7 +26,7 @@ class VideoClip extends Clip {
       } else {
         multiplier = multiplierToMatchHeight;
       }
-      image(mov, xPadding, yPadding, mov.width * multiplier, mov.height * multiplier);
+      image(mov, xPadding, yPadding, mov.width * multiplier * 2, mov.height * multiplier * 2);
     }
   //}
 }

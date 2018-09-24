@@ -18,6 +18,8 @@ class Curtains extends Clip {
         if (!(bottomOffset < -height && topOffset < -100)) {
           bottomOffset--;
           topOffset--;
+        } else {
+          this.fadeOut();
         }
       }
     }
